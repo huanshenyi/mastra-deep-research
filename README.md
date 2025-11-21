@@ -1,66 +1,66 @@
-# Deep Research Assistant with Mastra
+# Mastraによるディープリサーチアシスタント
 
-This project implements an advanced AI deep research assistant using Mastra's workflows and agent capabilities. It creates an interactive, human-in-the-loop research system that allows users to explore topics, evaluate results, and generate comprehensive reports.
+このプロジェクトは、Mastraのワークフローとエージェント機能を使用した高度なAIディープリサーチアシスタントを実装しています。ユーザーがトピックを探索し、結果を評価し、包括的なレポートを生成できる、インタラクティブな人間参加型のリサーチシステムを構築します。
 
-## Implementation Approach
+## 実装アプローチ
 
-The research assistant is built on Mastra's workflows architecture for better orchestration and human interaction:
+このリサーチアシスタントは、より優れたオーケストレーションと人間とのインタラクションを実現するため、Mastraのワークフローアーキテクチャ上に構築されています。
 
-1. **Workflow-Based Architecture**:
-   - `mainWorkflow`: Coordinates the entire research process
-   - `researchWorkflow`: Handles the core research functionality with suspend/resume for user interaction
-   - Human-in-the-loop experience with approval gates and iterative research
+1. **ワークフローベースのアーキテクチャ**:
+   - `mainWorkflow`: リサーチプロセス全体を調整
+   - `researchWorkflow`: ユーザーとのインタラクションのための中断/再開機能を備えたコアリサーチ機能を処理
+   - 承認ゲートと反復的なリサーチによる人間参加型の体験
 
-2. **Research Agent with Custom Tools**:
-   - `webSearchTool`: Searches the web using the Exa API for relevant information
-   - `evaluateResultTool`: Assesses result relevance to the research topic
-   - `extractLearningsTool`: Identifies key learnings and generates follow-up questions
+2. **カスタムツールを持つリサーチエージェント**:
+   - `webSearchTool`: Exa APIを使用してWeb上の関連情報を検索
+   - `evaluateResultTool`: リサーチトピックに対する結果の関連性を評価
+   - `extractLearningsTool`: 主要な学習内容を特定し、フォローアップの質問を生成
 
-3. **Report Generation**:
-   - `reportAgent`: Transforms research findings into comprehensive markdown reports
-   - Returns report content directly after user approval of research quality
+3. **レポート生成**:
+   - `reportAgent`: リサーチ結果を包括的なMarkdownレポートに変換
+   - リサーチ品質のユーザー承認後、レポート内容を直接返却
 
-## Key Benefits of Mastra vNext Implementation
+## Mastra vNext実装の主な利点
 
-1. **True Human-in-the-Loop Research**: Users can guide the research process, approve findings, and iterate when needed
+1. **真の人間参加型リサーチ**: ユーザーはリサーチプロセスをガイドし、結果を承認し、必要に応じて反復できます
 
-2. **Suspend/Resume Capabilities**: The workflow can pause at strategic points to collect user input and feedback
+2. **中断/再開機能**: ワークフローは戦略的なポイントで一時停止し、ユーザーの入力とフィードバックを収集できます
 
-3. **Structured Workflow**: Clear separation between research, approval, and report generation phases
+3. **構造化されたワークフロー**: リサーチ、承認、レポート生成の各フェーズを明確に分離
 
-4. **Resilient Operation**: Robust error handling and fallback mechanisms when web searches fail
+4. **堅牢な動作**: Web検索が失敗した場合の強固なエラーハンドリングとフォールバック機能
 
-5. **Modular Design**: Each component (workflows, agents, tools) can be maintained and upgraded independently
+5. **モジュラー設計**: 各コンポーネント(ワークフロー、エージェント、ツール)を独立してメンテナンスおよびアップグレード可能
 
-## How to Use
+## 使用方法
 
 ```bash
-# Install dependencies
+# 依存関係をインストール
 npm install
 
-# Run the research assistant
+# リサーチアシスタントを実行
 npm run dev
 ```
 
-Follow the interactive prompts:
+インタラクティブなプロンプトに従ってください:
 
-1. Enter your research topic
-2. Review the research findings
-3. Approve or reject the research results
-4. If approved, a comprehensive report will be returned as output
+1. リサーチトピックを入力
+2. リサーチ結果を確認
+3. リサーチ結果を承認または却下
+4. 承認された場合、包括的なレポートが出力として返されます
 
-## Required Environment Variables
+## 必要な環境変数
 
-Create a `.env` file with:
+`.env`ファイルを作成し、以下を設定してください:
 
 ```
 OPENAI_API_KEY=""
 EXA_API_KEY="your-exa-api-key"
 ```
 
-## Required Dependencies
+## 必要な依存関係
 
-- `@mastra/core`: Core Mastra functionality with vNext workflows
-- `@ai-sdk/openai`: OpenAI models integration
-- `exa-js`: Exa API client for web search
-- `zod`: Schema definition and validation for workflows
+- `@mastra/core`: vNextワークフローを含むMastraのコア機能
+- `@ai-sdk/openai`: OpenAIモデルとの統合
+- `exa-js`: Web検索用のExa APIクライアント
+- `zod`: ワークフローのスキーマ定義とバリデーション

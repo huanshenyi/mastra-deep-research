@@ -2,7 +2,7 @@ import { createStep, createWorkflow } from '@mastra/core/workflows';
 import { researchWorkflow } from './researchWorkflow';
 import { z } from 'zod';
 
-// Map research output to report input and handle conditional logic
+// リサーチ出力をレポート入力にマッピングし、条件分岐を処理
 const processResearchResultStep = createStep({
   id: 'process-research-result',
   inputSchema: z.object({
@@ -14,35 +14,35 @@ const processResearchResultStep = createStep({
     completed: z.boolean(),
   }),
   execute: async ({ inputData, mastra }) => {
-    // First determine if research was approved/successful
+    // まずリサーチが承認/成功したかを判定
     const approved = inputData.approved && !!inputData.researchData;
 
     if (!approved) {
-      console.log('Research not approved or incomplete, ending workflow');
+      console.log('リサーチが未承認または不完全のため、ワークフローを終了します');
       return { completed: false };
     }
 
-    // If approved, generate report
+    // 承認された場合、レポートを生成
     try {
-      console.log('Generating report...');
+      console.log('レポートを生成中...');
       const agent = mastra.getAgent('reportAgent');
       const response = await agent.generate([
         {
           role: 'user',
-          content: `Generate a report based on this research: ${JSON.stringify(inputData.researchData)}`,
+          content: `以下のリサーチ結果に基づいてレポートを生成してください: ${JSON.stringify(inputData.researchData)}`,
         },
       ]);
 
-      console.log('Report generated successfully!');
+      console.log('レポートが正常に生成されました！');
       return { report: response.text, completed: true };
     } catch (error) {
-      console.error('Error generating report:', error);
+      console.error('レポート生成エラー:', error);
       return { completed: false };
     }
   },
 });
 
-// Create the report generation workflow that iteratively researches and generates reports
+// 反復的にリサーチしてレポートを生成するワークフローを作成
 export const generateReportWorkflow = createWorkflow({
   id: 'generate-report-workflow',
   steps: [researchWorkflow, processResearchResultStep],
@@ -53,9 +53,9 @@ export const generateReportWorkflow = createWorkflow({
   }),
 });
 
-// The workflow logic:
-// 1. Run researchWorkflow iteratively until approved
-// 2. Process results and generate report if approved
+// ワークフローのロジック:
+// 1. 承認されるまでresearchWorkflowを反復実行
+// 2. 承認された場合、結果を処理してレポートを生成
 generateReportWorkflow
   .dowhile(researchWorkflow, async ({ inputData }) => {
     const isCompleted = inputData.approved;

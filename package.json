@@ -17,11 +17,15 @@
     "node": ">=22.13.0"
   },
   "dependencies": {
-    "@mastra/core": "latest",
+    "@ai-sdk/amazon-bedrock": "^3.0.56",
+    "@aws-sdk/credential-providers": "^3.934.0",
+    "@mastra/core": "0.24.2",
+    "@mastra/langfuse": "^0.2.3",
     "@mastra/libsql": "latest",
     "@mastra/loggers": "latest",
     "@mastra/memory": "latest",
-    "ai": "^4.3.19",
+    "@tavily/core": "^0.5.13",
+    "ai": "^5.0.93",
     "exa-js": "^1.8.27",
     "zod": "^3.25.76"
   },

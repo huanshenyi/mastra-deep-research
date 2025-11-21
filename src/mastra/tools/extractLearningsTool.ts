@@ -15,6 +15,7 @@ export const extractLearningsTool = createTool({
       .describe('The search result to process'),
   }),
   execute: async ({ context, mastra }) => {
+    const logger = mastra?.getLogger();
     try {
       const { query, result } = context;
 
@@ -24,31 +25,33 @@ export const extractLearningsTool = createTool({
         [
           {
             role: 'user',
-            content: `The user is researching "${query}".
-            Extract a key learning and generate follow-up questions from this search result:
+            content: `ユーザーは「${query}」について調査しています。
+            この検索結果から重要な学びとフォローアップ質問を抽出してください：
 
-            Title: ${result.title}
+            タイトル: ${result.title}
             URL: ${result.url}
-            Content: ${result.content.substring(0, 1500)}...
+            内容: ${result.content.substring(0, 1500)}...
 
-            Respond with a JSON object containing:
-            - learning: string with the key insight from the content
-            - followUpQuestions: array of up to 1 follow-up question for deeper research`,
+            以下の形式のJSONオブジェクトで回答してください：
+            - learning: コンテンツから得られた重要な洞察（文字列）
+            - followUpQuestions: より深い調査のためのフォローアップ質問（最大1つの配列）`,
           },
         ],
         {
-          experimental_output: z.object({
-            learning: z.string(),
-            followUpQuestions: z.array(z.string()).max(1),
-          }),
+          structuredOutput: {
+            schema: z.object({
+              learning: z.string(),
+              followUpQuestions: z.array(z.string()).max(1),
+            })
+          },
         },
       );
 
-      console.log('Learning extraction response:', response.object);
+      logger?.info('Learning extraction response:', response.object);
 
       return response.object;
     } catch (error) {
-      console.error('Error extracting learnings:', error);
+      logger?.error('Error extracting learnings:', error);
       return {
         learning: 'Error extracting information',
         followUpQuestions: [],

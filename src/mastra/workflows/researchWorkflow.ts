@@ -1,7 +1,7 @@
 import { createWorkflow, createStep } from '@mastra/core/workflows';
 import { z } from 'zod';
 
-// Step 1: Get user query
+// ステップ1: ユーザーのクエリを取得
 const getUserQueryStep = createStep({
   id: 'get-user-query',
   inputSchema: z.object({}),
@@ -26,7 +26,7 @@ const getUserQueryStep = createStep({
 
     await suspend({
       message: {
-        query: 'What would you like to research?',
+        query: '何をリサーチしますか？',
       },
     });
 
@@ -36,7 +36,7 @@ const getUserQueryStep = createStep({
   },
 });
 
-// Step 2: Research
+// ステップ2: リサーチ
 const researchStep = createStep({
   id: 'research',
   inputSchema: z.object({
@@ -48,52 +48,52 @@ const researchStep = createStep({
   }),
   execute: async ({ inputData, mastra }) => {
     const { query } = inputData;
+    console.log(`Starting research for query: "${query}"`);
 
     try {
       const agent = mastra.getAgent('researchAgent');
-      const researchPrompt = `Research the following topic thoroughly using the two-phase process: "${query}".
+      const researchPrompt = `以下のトピックをリサーチしてください: "${query}"
 
-      Phase 1: Search for 2-3 initial queries about this topic
-      Phase 2: Search for follow-up questions from the learnings (then STOP)
+      結果は以下のJSON形式のみで返してください（説明文なし）:
+      {
+        "queries": ["検索クエリ1", "検索クエリ2"],
+        "searchResults": [{"title": "...", "url": "...", "relevance": "..."}],
+        "learnings": [{"learning": "...", "followUpQuestions": [...], "source": "..."}],
+        "completedQueries": ["完了したクエリ"],
+        "phase": "initial または follow-up"
+      }`;
 
-      Return findings in JSON format with queries, searchResults, learnings, completedQueries, and phase.`;
+      const result = await agent.generate(researchPrompt, {
+        maxSteps: 10,
+      });
 
-      const result = await agent.generate(
-        [
-          {
-            role: 'user',
-            content: researchPrompt,
-          },
-        ],
-        {
-          maxSteps: 15,
-          experimental_output: z.object({
-            queries: z.array(z.string()),
-            searchResults: z.array(
-              z.object({
-                title: z.string(),
-                url: z.string(),
-                relevance: z.string(),
-              }),
-            ),
-            learnings: z.array(
-              z.object({
-                learning: z.string(),
-                followUpQuestions: z.array(z.string()),
-                source: z.string(),
-              }),
-            ),
-            completedQueries: z.array(z.string()),
-            phase: z.string().optional(),
-          }),
-        },
-      );
+      console.log('Research agent result:', result.text);
 
-      // Create a summary
-      const summary = `Research completed on "${query}:" \n\n ${JSON.stringify(result.object, null, 2)}\n\n`;
+      // 結果をパース
+      let researchData;
+      try {
+        // JSONブロックを抽出
+        const jsonMatch = result.text.match(/```json\s*([\s\S]*?)\s*```/) ||
+          result.text.match(/\{[\s\S]*\}/);
+        const jsonStr = jsonMatch ? (jsonMatch[1] || jsonMatch[0]) : result.text;
+        researchData = JSON.parse(jsonStr);
+      } catch (parseError) {
+        console.error('Failed to parse JSON:', parseError);
+        researchData = {
+          queries: [],
+          searchResults: [],
+          learnings: [],
+          completedQueries: [],
+          phase: 'error',
+          rawText: result.text,
+        };
+      }
+
+      // サマリーを作成
+      const summary = `Research completed on "${query}:" \n\n ${JSON.stringify(researchData, null, 2)}\n\n`;
 
       return {
-        researchData: result.object,
+        researchData,
         summary,
       };
     } catch (error: any) {
@@ -106,7 +106,7 @@ const researchStep = createStep({
   },
 });
 
-// Step 3: Get user approval
+// ステップ3: ユーザーの承認を取得
 const approvalStep = createStep({
   id: 'approval',
   inputSchema: z.object({
@@ -130,7 +130,7 @@ const approvalStep = createStep({
 
     await suspend({
       summary: inputData.summary,
-      message: `Is this research sufficient? [y/n] `,
+      message: `このリサーチで十分ですか？ [y/n] `,
     });
 
     return {
@@ -140,7 +140,7 @@ const approvalStep = createStep({
   },
 });
 
-// Define the workflow
+// ワークフローを定義
 export const researchWorkflow = createWorkflow({
   id: 'research-workflow',
   inputSchema: z.object({}),

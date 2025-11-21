@@ -47,10 +47,12 @@ export const evaluateResultTool = createTool({
           },
         ],
         {
-          experimental_output: z.object({
-            isRelevant: z.boolean(),
-            reason: z.string(),
-          }),
+          structuredOutput: {
+            schema: z.object({
+              isRelevant: z.boolean(),
+              reason: z.string(),
+            }),
+          },
         },
       );
 
