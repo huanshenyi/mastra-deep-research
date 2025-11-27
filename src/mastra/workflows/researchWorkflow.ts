@@ -64,7 +64,7 @@ const researchStep = createStep({
       }`;
 
       const result = await agent.generate(researchPrompt, {
-        maxSteps: 10,
+        maxSteps: 15,
       });
 
       console.log('Research agent result:', result.text);

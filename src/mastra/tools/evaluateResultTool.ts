@@ -3,17 +3,17 @@ import { z } from 'zod';
 
 export const evaluateResultTool = createTool({
   id: 'evaluate-result',
-  description: 'Evaluate if a search result is relevant to the research query',
+  description: '検索結果がリサーチクエリに関連しているか評価する',
   inputSchema: z.object({
-    query: z.string().describe('The original research query'),
+    query: z.string().describe('元のリサーチクエリ'),
     result: z
       .object({
         title: z.string(),
         url: z.string(),
         content: z.string(),
       })
-      .describe('The search result to evaluate'),
-    existingUrls: z.array(z.string()).describe('URLs that have already been processed').optional(),
+      .describe('評価する検索結果'),
+    existingUrls: z.array(z.string()).describe('既に処理されたURL').optional(),
   }),
   execute: async ({ context, mastra }) => {
     try {
@@ -24,7 +24,7 @@ export const evaluateResultTool = createTool({
       if (existingUrls && existingUrls.includes(result.url)) {
         return {
           isRelevant: false,
-          reason: 'URL already processed',
+          reason: '既に処理されたURL',
         };
       }
 
@@ -34,16 +34,16 @@ export const evaluateResultTool = createTool({
         [
           {
             role: 'user',
-            content: `Evaluate whether this search result is relevant and will help answer the query: "${query}".
+            content: `この検索結果が次のクエリ「${query}」に関連しており、回答に役立つかどうかを評価してください。
 
-        Search result:
-        Title: ${result.title}
+        検索結果:
+        タイトル: ${result.title}
         URL: ${result.url}
-        Content snippet: ${result.content.substring(0, 500)}...
+        コンテンツの抜粋: ${result.content.substring(0, 500)}...
 
-        Respond with a JSON object containing:
-        - isRelevant: boolean indicating if the result is relevant
-        - reason: brief explanation of your decision`,
+        以下を含むJSONオブジェクトで応答してください:
+        - isRelevant: 結果が関連しているかを示すboolean値
+        - reason: 判断の簡潔な説明`,
           },
         ],
         {
@@ -61,7 +61,7 @@ export const evaluateResultTool = createTool({
       console.error('Error evaluating result:', error);
       return {
         isRelevant: false,
-        reason: 'Error in evaluation',
+        reason: '評価中のエラー',
       };
     }
   },
