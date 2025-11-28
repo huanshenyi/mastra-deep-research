@@ -1,6 +1,8 @@
 import { Mastra } from '@mastra/core/mastra';
 import { LibSQLStore } from '@mastra/libsql';
+import { workflowRoute } from '@mastra/ai-sdk';
 import { researchWorkflow } from './workflows/researchWorkflow';
+import { testWorkflow } from "./workflows/test-workflow"
 import { learningExtractionAgent } from './agents/learningExtractionAgent';
 import { evaluationAgent } from './agents/evaluationAgent';
 import { reportAgent } from './agents/reportAgent';
@@ -31,7 +33,7 @@ export const mastra = new Mastra({
     learningExtractionAgent,
     webSummarizationAgent,
   },
-  workflows: { generateReportWorkflow, researchWorkflow },
+  workflows: { generateReportWorkflow, researchWorkflow, testWorkflow },
   observability: {
     configs: {
       langfuse: {
@@ -42,5 +44,18 @@ export const mastra = new Mastra({
         ],
       },
     },
+  },
+  server: {
+    port: 4111,
+    cors: {
+      origin: "*",
+      allowMethods: ["*"],
+      allowHeaders: ["*"],
+    },
+    apiRoutes: [
+      workflowRoute({
+        path: "/workflow/:workflowId",
+      }),
+    ],
   },
 });
