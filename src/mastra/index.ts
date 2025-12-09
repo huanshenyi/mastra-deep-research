@@ -8,6 +8,8 @@ import { evaluationAgent } from './agents/evaluationAgent';
 import { reportAgent } from './agents/reportAgent';
 import { researchAgent } from './agents/researchAgent';
 import { webSummarizationAgent } from './agents/webSummarizationAgent';
+import { queryEvaluationAgent } from './agents/queryEvaluationAgent';
+import { askAgainWorkflow } from './workflows/ask-again-workflow';
 import { generateReportWorkflow } from './workflows/generateReportWorkflow';
 import { LangfuseExporter } from '@mastra/langfuse';
 import { SamplingStrategyType } from '@mastra/core/ai-tracing';
@@ -32,8 +34,9 @@ export const mastra = new Mastra({
     evaluationAgent,
     learningExtractionAgent,
     webSummarizationAgent,
+    queryEvaluationAgent,
   },
-  workflows: { generateReportWorkflow, researchWorkflow, testWorkflow },
+  workflows: { generateReportWorkflow, researchWorkflow, testWorkflow, askAgainWorkflow },
   observability: {
     configs: {
       langfuse: {
