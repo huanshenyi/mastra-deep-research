@@ -37,9 +37,12 @@ const evaluateSearchabilityStep = createStep({
 
 このクエリは検索可能ですか？`,
             {
-                output: z.object({
-                    isSearchable: z.boolean()
-                })
+                structuredOutput: {
+                    schema: z.object({
+                        isSearchable: z.boolean()
+                    }),
+                    jsonPromptInjection: true,
+                }
             }
         );
 
