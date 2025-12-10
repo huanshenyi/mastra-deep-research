@@ -11,22 +11,21 @@ import { z } from 'zod';
  * - 検索不可(false)かつresumeDataなし: ワークフローをsuspendして修正クエリを待つ
  * - 検索不可(false)かつresumeDataあり: 再評価結果をそのまま返す
  */
-const evaluateSearchabilityStep = createStep({
-    id: "evaluate-searchability",
+const getUserQueryStep = createStep({
+    id: 'get-user-query',
     inputSchema: z.object({
-        query: z.string()
+        query: z.string(),
     }),
     outputSchema: z.object({
-        isSearchable: z.boolean()
+        query: z.string(),
     }),
     resumeSchema: z.object({
-        query: z.string()
+        query: z.string(),
     }),
     suspendSchema: z.object({
-        originalQuery: z.string()
+        originalQuery: z.string(),
     }),
     execute: async ({ inputData, resumeData, suspend, mastra }) => {
-        // resumeDataがあれば修正されたクエリを使用
         const query = resumeData?.query ?? inputData.query;
 
         const agent = mastra.getAgent('queryEvaluationAgent');
@@ -48,17 +47,22 @@ const evaluateSearchabilityStep = createStep({
 
         const isSearchable = result.object?.isSearchable ?? false;
 
-        // falseかつresumeDataがなければsuspend
-        if (!isSearchable && !resumeData) {
+        // resumeDataがあればそのクエリを使用
+        if (resumeData) {
+            return { query: resumeData.query };
+        }
+
+        // 検索不可ならsuspend
+        if (!isSearchable) {
             return await suspend({
                 originalQuery: `${inputData.query} 少し物足りないです。もう少し具体的にしてもらえますか？`
             });
         }
 
-        return { isSearchable };
-    }
+        // 検索可能ならそのまま返す
+        return { query };
+    },
 });
-
 /**
  * 検索クエリ評価ワークフロー
  *
@@ -71,8 +75,8 @@ export const askAgainWorkflow = createWorkflow({
         query: z.string().describe('検索したい内容')
     }),
     outputSchema: z.object({
-        isSearchable: z.boolean()
+        query: z.string().describe('検索可能なクエリ')
     })
 })
-    .then(evaluateSearchabilityStep)
+    .then(getUserQueryStep)
     .commit();

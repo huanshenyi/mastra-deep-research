@@ -4,7 +4,9 @@ import { z } from 'zod';
 // ステップ1: ユーザーのクエリを取得
 const getUserQueryStep = createStep({
   id: 'get-user-query',
-  inputSchema: z.object({}),
+  inputSchema: z.object({
+    query: z.string(),
+  }),
   outputSchema: z.object({
     query: z.string(),
   }),
@@ -12,27 +14,43 @@ const getUserQueryStep = createStep({
     query: z.string(),
   }),
   suspendSchema: z.object({
-    message: z.object({
-      query: z.string(),
-    }),
+    originalQuery: z.string(),
   }),
-  execute: async ({ resumeData, suspend }) => {
+  execute: async ({ inputData, resumeData, suspend, mastra }) => {
+    const query = resumeData?.query ?? inputData.query;
+
+    const agent = mastra.getAgent('queryEvaluationAgent');
+
+    // structuredOutputでbool値のみを返す
+    const result = await agent.generate(
+      `クエリ: ${query}
+
+このクエリは検索可能ですか？`,
+      {
+        structuredOutput: {
+          schema: z.object({
+            isSearchable: z.boolean()
+          }),
+          jsonPromptInjection: true,
+        }
+      }
+    );
+
+    const isSearchable = result.object?.isSearchable ?? false;
+
     if (resumeData) {
-      return {
-        ...resumeData,
-        query: resumeData.query || '',
-      };
+      return { query: resumeData.query };
     }
 
-    await suspend({
-      message: {
-        query: '何をリサーチしますか？',
-      },
-    });
+    // 検索不可ならsuspend
+    if (!isSearchable) {
+      return await suspend({
+        originalQuery: `${inputData.query} 少し物足りないです。もう少し具体的にしてもらえますか？`
+      });
+    }
 
-    return {
-      query: '',
-    };
+    // 検索可能ならそのまま返す
+    return { query };
   },
 });
 
@@ -54,20 +72,23 @@ const researchStep = createStep({
       const agent = mastra.getAgent('researchAgent');
       const researchPrompt = `以下のトピックをリサーチしてください: "${query}"
 
-      結果は以下のJSON形式のみで返してください（説明文なし）:
+   結果は以下のJSON形式のみで返してください（説明文なし）:
       {
         "queries": ["検索クエリ1", "検索クエリ2"],
-        "searchResults": [{"title": "...", "url": "...", "relevance": "..."}],
+        "searchResults": [{"title": "...", "url": "...", "content": "..."}],
         "learnings": [{"learning": "...", "followUpQuestions": [...], "source": "..."}],
         "completedQueries": ["完了したクエリ"],
         "phase": "initial または follow-up"
       }`;
 
+
       const result = await agent.generate(researchPrompt, {
         maxSteps: 15,
       });
 
+
       console.log('Research agent result:', result.text);
+
 
       // 結果をパース
       let researchData;
@@ -89,13 +110,16 @@ const researchStep = createStep({
         };
       }
 
+
       // サマリーを作成
       const summary = `Research completed on "${query}:" \n\n ${JSON.stringify(researchData, null, 2)}\n\n`;
+
 
       return {
         researchData,
         summary,
       };
+
     } catch (error: any) {
       console.log({ error });
       return {
@@ -143,7 +167,9 @@ const approvalStep = createStep({
 // ワークフローを定義
 export const researchWorkflow = createWorkflow({
   id: 'research-workflow',
-  inputSchema: z.object({}),
+  inputSchema: z.object({
+    query: z.string(),
+  }),
   outputSchema: z.object({
     approved: z.boolean(),
     researchData: z.any(),
