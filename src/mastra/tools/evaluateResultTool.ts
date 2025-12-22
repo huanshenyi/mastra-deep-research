@@ -1,5 +1,5 @@
-import { createTool } from '@mastra/core/tools';
 import { z } from 'zod';
+import { createTool } from '@mastra/core/tools';
 
 export const evaluateResultTool = createTool({
   id: 'evaluate-result',
@@ -18,7 +18,6 @@ export const evaluateResultTool = createTool({
   execute: async ({ context, mastra }) => {
     try {
       const { query, result, existingUrls = [] } = context;
-      console.log('Evaluating result', { context });
 
       // Check if URL already exists (only if existingUrls was provided)
       if (existingUrls && existingUrls.includes(result.url)) {
@@ -58,7 +57,6 @@ export const evaluateResultTool = createTool({
 
       return response.object;
     } catch (error) {
-      console.error('Error evaluating result:', error);
       return {
         isRelevant: false,
         reason: '評価中のエラー',

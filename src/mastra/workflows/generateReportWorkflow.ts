@@ -24,7 +24,6 @@ const processResearchResultStep = createStep({
 
     // 承認された場合、レポートを生成
     try {
-      console.log('レポートを生成中...');
       const agent = mastra.getAgent('reportAgent');
       const response = await agent.generate([
         {
@@ -32,8 +31,6 @@ const processResearchResultStep = createStep({
           content: `以下のリサーチ結果に基づいてレポートを生成してください: ${JSON.stringify(inputData.researchData)}`,
         },
       ]);
-
-      console.log('レポートが正常に生成されました！');
       return { report: response.text, completed: true };
     } catch (error) {
       console.error('レポート生成エラー:', error);
