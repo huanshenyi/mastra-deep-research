@@ -1,17 +1,18 @@
-# ゼロからのセットアップガイド
+# 手動セットアップガイド
 
-このドキュメントでは、Vite + React + Mastra プロジェクトをゼロから構築する方法を解説します。
+このドキュメントでは、Mastra バックエンドと統合された Vite + React プロジェクトを手動でセットアップする方法を解説します。
 
-## 必要な環境
+## 概要
 
-- **Node.js**: v22.13.0 以上
-- **パッケージマネージャー**: pnpm（推奨）、npm、または yarn
-- **AWS アカウント**: Amazon Bedrock を使用する場合
-- **Exa API キー**: Web検索機能を使用する場合
+このプロジェクトは以下の構造を採用しています：
 
-## プロジェクトの初期化
+- **`src/app/`** - フロントエンド（React + Vite）
+- **`src/mastra/`** - バックエンド（Mastra）
+- **`src/lib/`** - 共有ライブラリ
 
-### 1. ディレクトリの作成と初期化
+標準的な `pnpm create vite` とは異なり、手動でディレクトリ構造を作成します。
+
+## 1. プロジェクトの初期化
 
 ```bash
 mkdir my-mastra-app
@@ -19,9 +20,62 @@ cd my-mastra-app
 pnpm init
 ```
 
-### 2. 依存関係のインストール
+## 2. ディレクトリ構造の作成
 
-#### フロントエンド依存関係
+```bash
+# フロントエンド
+mkdir -p src/app/components/ui
+mkdir -p src/app/components/ai-elements
+mkdir -p src/app/pages
+mkdir -p src/app/lib
+
+# バックエンド
+mkdir -p src/mastra/agents
+mkdir -p src/mastra/tools
+mkdir -p src/mastra/workflows
+
+# 共有ライブラリ
+mkdir -p src/lib
+
+# 静的ファイル
+mkdir -p public
+```
+
+最終的な構造：
+
+```
+my-mastra-app/
+├── index.html
+├── package.json
+├── vite.config.ts
+├── tsconfig.json
+├── tsconfig.app.json
+├── tsconfig.node.json
+├── src/
+│   ├── app/                    # フロントエンド
+│   │   ├── main.tsx
+│   │   ├── App.tsx
+│   │   ├── index.css
+│   │   ├── constants.ts
+│   │   ├── vite-env.d.ts
+│   │   ├── lib/
+│   │   │   └── utils.ts
+│   │   ├── components/
+│   │   │   ├── ui/
+│   │   │   └── ai-elements/
+│   │   └── pages/
+│   ├── mastra/                 # バックエンド
+│   │   ├── index.ts
+│   │   ├── agents/
+│   │   ├── tools/
+│   │   └── workflows/
+│   └── lib/                    # 共有ライブラリ
+└── public/
+```
+
+## 3. 依存関係のインストール
+
+### フロントエンド
 
 ```bash
 # React と Vite
@@ -40,7 +94,7 @@ pnpm add class-variance-authority clsx tailwind-merge lucide-react
 pnpm add ai @ai-sdk/react
 ```
 
-#### バックエンド依存関係（Mastra）
+### バックエンド（Mastra）
 
 ```bash
 # Mastra コア
@@ -62,13 +116,15 @@ pnpm add @tavily/core
 pnpm add zod
 ```
 
-#### 開発ツール
+### 開発ツール
 
 ```bash
 pnpm add -D concurrently
 ```
 
-### 3. package.json の設定
+## 4. 設定ファイルの作成
+
+### package.json
 
 ```json
 {
@@ -91,9 +147,7 @@ pnpm add -D concurrently
 }
 ```
 
-## 設定ファイルの作成
-
-### 1. vite.config.ts
+### vite.config.ts
 
 ```typescript
 import path from "path";
@@ -111,7 +165,7 @@ export default defineConfig({
 });
 ```
 
-### 2. tsconfig.json
+### tsconfig.json
 
 ```json
 {
@@ -129,7 +183,7 @@ export default defineConfig({
 }
 ```
 
-### 3. tsconfig.app.json（フロントエンド用）
+### tsconfig.app.json（フロントエンド用）
 
 ```json
 {
@@ -160,7 +214,7 @@ export default defineConfig({
 }
 ```
 
-### 4. tsconfig.node.json（バックエンド・ビルドツール用）
+### tsconfig.node.json（バックエンド・ビルドツール用）
 
 ```json
 {
@@ -186,7 +240,7 @@ export default defineConfig({
 }
 ```
 
-### 5. index.html
+### index.html
 
 ```html
 <!DOCTYPE html>
@@ -204,53 +258,7 @@ export default defineConfig({
 </html>
 ```
 
-## ディレクトリ構造の作成
-
-```bash
-mkdir -p src/app/components/ui
-mkdir -p src/app/components/ai-elements
-mkdir -p src/app/pages
-mkdir -p src/app/lib
-mkdir -p src/mastra/agents
-mkdir -p src/mastra/tools
-mkdir -p src/mastra/workflows
-mkdir -p src/lib
-```
-
-最終的なディレクトリ構造:
-
-```
-my-mastra-app/
-├── index.html
-├── package.json
-├── vite.config.ts
-├── tsconfig.json
-├── tsconfig.app.json
-├── tsconfig.node.json
-├── src/
-│   ├── app/                    # フロントエンド
-│   │   ├── main.tsx           # エントリーポイント
-│   │   ├── App.tsx            # ルートコンポーネント
-│   │   ├── index.css          # グローバルスタイル
-│   │   ├── constants.ts       # 設定定数
-│   │   ├── vite-env.d.ts      # Vite型定義
-│   │   ├── lib/
-│   │   │   └── utils.ts       # ユーティリティ関数
-│   │   ├── components/
-│   │   │   ├── ui/            # 基本UIコンポーネント
-│   │   │   └── ai-elements/   # AI専用コンポーネント
-│   │   └── pages/             # ページコンポーネント
-│   ├── mastra/                 # バックエンド
-│   │   ├── index.ts           # Mastraインスタンス
-│   │   ├── agents/            # AIエージェント
-│   │   ├── tools/             # ツール定義
-│   │   └── workflows/         # ワークフロー定義
-│   └── lib/                    # 共有ライブラリ
-└── public/
-    └── vite.svg
-```
-
-## 基本ファイルの作成
+## 5. 基本ファイルの作成
 
 ### src/app/main.tsx
 
@@ -277,14 +285,14 @@ function App() {
 
   const renderPage = () => {
     switch (pathname) {
-      case "/other":
-        return <OtherPage />;
+      // case "/other":
+      //   return <OtherPage />;
       default:
         return <MyPage />;
     }
   };
 
-  return <>{renderPage()}</>;
+  return <div className="min-h-screen bg-background">{renderPage()}</div>;
 }
 
 export default App;
@@ -316,9 +324,85 @@ export function cn(...inputs: ClassValue[]) {
 
 ### src/app/index.css
 
-Tailwind CSS v4 のスタイル設定については、[frontend-architecture.md](./frontend-architecture.md) を参照してください。
+```css
+@import "tailwindcss";
+@import "tw-animate-css";
 
-## 開発サーバーの起動
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
+:root {
+  --radius: 0.625rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.129 0.042 264.695);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.129 0.042 264.695);
+  --primary: oklch(0.208 0.042 265.755);
+  --primary-foreground: oklch(0.984 0.003 247.858);
+  --secondary: oklch(0.968 0.007 247.896);
+  --secondary-foreground: oklch(0.208 0.042 265.755);
+  --muted: oklch(0.968 0.007 247.896);
+  --muted-foreground: oklch(0.554 0.046 257.417);
+  --accent: oklch(0.968 0.007 247.896);
+  --accent-foreground: oklch(0.208 0.042 265.755);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.929 0.013 255.508);
+  --input: oklch(0.929 0.013 255.508);
+  --ring: oklch(0.704 0.04 256.788);
+}
+
+.dark {
+  --background: oklch(0.129 0.042 264.695);
+  --foreground: oklch(0.984 0.003 247.858);
+  --card: oklch(0.208 0.042 265.755);
+  --card-foreground: oklch(0.984 0.003 247.858);
+  --primary: oklch(0.929 0.013 255.508);
+  --primary-foreground: oklch(0.208 0.042 265.755);
+  --secondary: oklch(0.279 0.041 260.031);
+  --secondary-foreground: oklch(0.984 0.003 247.858);
+  --muted: oklch(0.279 0.041 260.031);
+  --muted-foreground: oklch(0.704 0.04 256.788);
+  --accent: oklch(0.279 0.041 260.031);
+  --accent-foreground: oklch(0.984 0.003 247.858);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.551 0.027 264.364);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+```
+
+## 6. 開発サーバーの起動
 
 ```bash
 # フロントエンドとバックエンドを同時に起動
@@ -331,34 +415,29 @@ pnpm vite:dev
 pnpm mastra:dev
 ```
 
-デフォルトのURL:
+デフォルトの URL:
 - **フロントエンド**: http://localhost:5173
 - **Mastra バックエンド**: http://localhost:4111
 
-## 環境変数
+## 7. 環境変数
 
-`.env` ファイルを作成して環境変数を設定:
+`.env` ファイルを作成：
 
 ```bash
 # Mastra バックエンドURL
 VITE_MASTRA_BASE_URL=http://localhost:4111
 
-# AWS Bedrock（ローカル開発用）
+# AWS Bedrock
 AWS_ACCESS_KEY_ID=your-access-key
 AWS_SECRET_ACCESS_KEY=your-secret-key
 AWS_REGION=us-east-1
 
 # Exa API（検索機能用）
 EXA_API_KEY=your-exa-api-key
-
-# Langfuse（オプション：オブザーバビリティ）
-LANGFUSE_PUBLIC_KEY=your-public-key
-LANGFUSE_SECRET_KEY=your-secret-key
 ```
 
 ## 次のステップ
 
-- [フロントエンドアーキテクチャ](./frontend-architecture.md) - プロジェクト構成の詳細
-- [コンポーネントガイド](./components-guide.md) - UIコンポーネントの使い方
+- [フロントエンドアーキテクチャ](./frontend-architecture.md) - スタイリング・コンポーネント設計
+- [コンポーネントガイド](./components-guide.md) - UI コンポーネントの使い方
 - [Mastra連携ガイド](./mastra-integration.md) - バックエンドとの連携方法
-- [デプロイガイド](./deployment-guide.md) - Vercel + Railway へのデプロイ

@@ -2,6 +2,64 @@
 
 このドキュメントでは、プロジェクトのフロントエンド構成について詳しく解説します。
 
+## プロジェクト初期化
+
+> **Note:** Mastra バックエンドと統合したプロジェクト構造（`src/app/` 配下にフロントエンド）で手動セットアップする場合は、
+> [手動セットアップガイド](./manual-setup.md) を参照してください。
+
+### Vite + React プロジェクトの作成
+
+```bash
+# Vite で React + TypeScript プロジェクトを作成
+pnpm create vite@latest my-app -- --template react-ts
+cd my-app
+```
+
+### 依存関係のインストール
+
+#### Tailwind CSS v4
+
+```bash
+pnpm add tailwindcss @tailwindcss/vite tw-animate-css
+```
+
+#### UI コンポーネント関連
+
+```bash
+# Radix UI プリミティブ
+pnpm add @radix-ui/react-avatar @radix-ui/react-collapsible @radix-ui/react-slot
+
+# スタイリングユーティリティ
+pnpm add class-variance-authority clsx tailwind-merge
+
+# アイコン
+pnpm add lucide-react
+```
+
+#### AI SDK
+
+```bash
+pnpm add ai @ai-sdk/react
+```
+
+### vite.config.ts の設定
+
+```typescript
+import path from "path";
+import tailwindcss from "@tailwindcss/vite";
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+
+export default defineConfig({
+  plugins: [react(), tailwindcss()],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src/app"),
+    },
+  },
+});
+```
+
 ## 技術スタック
 
 | 技術 | バージョン | 用途 |

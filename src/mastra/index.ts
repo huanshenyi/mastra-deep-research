@@ -14,6 +14,7 @@ import { generateReportWorkflow } from './workflows/generateReportWorkflow';
 // import { researchWorkflow } from './workflows/testResearchWorkflow'
 import { LangfuseExporter } from '@mastra/langfuse';
 import { SamplingStrategyType } from '@mastra/core/ai-tracing';
+import { MastraJwtAuth } from "@mastra/auth";
 
 const exporter = new LangfuseExporter({
   publicKey: process.env.LANGFUSE_PUBLIC_KEY,
@@ -50,9 +51,12 @@ export const mastra = new Mastra({
     },
   },
   server: {
-    port: 4111,
+    port: parseInt(process.env.PORT || '4111'),
+    // experimental_auth: new MastraJwtAuth({
+    //   secret: process.env.MASTRA_JWT_SECRET,
+    // }),
     cors: {
-      origin: "*",
+      origin: process.env.CORS_ORIGIN || "*",
       allowMethods: ["*"],
       allowHeaders: ["*"],
     },
