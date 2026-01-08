@@ -1,5 +1,6 @@
 import ResearchWorkflowDemo from "./pages/research-workflow";
 import AskAgainWorkflowDemo from "./pages/ask-again-workflow";
+import GenerateReportWorkflowDemo from "./pages/generate-report-workflow";
 
 function App() {
     const pathname = window.location.pathname;
@@ -8,6 +9,8 @@ function App() {
         switch (pathname) {
             case "/ask-again":
                 return <AskAgainWorkflowDemo />;
+            case "/generate-report":
+                return <GenerateReportWorkflowDemo />;
             default:
                 return <ResearchWorkflowDemo />;
         }
