@@ -43,7 +43,9 @@ const processResearchResultStep = createStep({
 export const generateReportWorkflow = createWorkflow({
   id: 'generate-report-workflow',
   steps: [researchWorkflow, processResearchResultStep],
-  inputSchema: z.object({}),
+  inputSchema: z.object({
+    query: z.string(),
+  }),
   outputSchema: z.object({
     report: z.string().optional(),
     completed: z.boolean(),
