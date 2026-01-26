@@ -17,7 +17,9 @@ const step1 = createStep({
     const { approved } = resumeData ?? {};
 
     if (!approved) {
-      return await suspend({});
+      return await suspend({
+        message: `Please approve sending an email to ${userEmail}`
+      });
     }
 
     return {

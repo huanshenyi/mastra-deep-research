@@ -11,10 +11,10 @@ export const tavilyWebSearchTool = createTool({
   inputSchema: z.object({
     query: z.string().describe('The search query to run'),
   }),
-  execute: async ({ context, mastra }) => {
-    const logger = mastra?.getLogger();
+  execute: async (inputData, context) => {
+    const logger = context.mastra?.getLogger();
     logger?.info('Executing Tavily web search tool');
-    const { query } = context;
+    const { query } = inputData;
 
     try {
       if (!process.env.TAVILY_API_KEY) {

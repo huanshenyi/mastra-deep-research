@@ -13,8 +13,13 @@ import { askAgainWorkflow } from './workflows/ask-again-workflow';
 import { generateReportWorkflow } from './workflows/generateReportWorkflow';
 // import { researchWorkflow } from './workflows/testResearchWorkflow'
 import { LangfuseExporter } from '@mastra/langfuse';
-import { SamplingStrategyType } from '@mastra/core/ai-tracing';
-import { MastraJwtAuth } from "@mastra/auth";
+import { SamplingStrategyType } from '@mastra/core/observability';
+import {
+  Observability,
+  DefaultExporter,
+  CloudExporter,
+  SensitiveDataFilter,
+} from '@mastra/observability';
 
 const exporter = new LangfuseExporter({
   publicKey: process.env.LANGFUSE_PUBLIC_KEY,
@@ -27,7 +32,9 @@ const exporter = new LangfuseExporter({
 })
 
 export const mastra = new Mastra({
+  /* FIXME(mastra): Add a unique `id` parameter. See: https://mastra.ai/guides/migrations/upgrade-to-v1/mastra#required-id-parameter-for-all-mastra-primitives */
   storage: new LibSQLStore({
+    id: 'deep-research-storage',
     url: 'file:../mastra.db',
   }),
   agents: {
@@ -39,7 +46,7 @@ export const mastra = new Mastra({
     queryEvaluationAgent,
   },
   workflows: { generateReportWorkflow, researchWorkflow, testWorkflow, askAgainWorkflow },
-  observability: {
+  observability: new Observability({
     configs: {
       langfuse: {
         sampling: { type: SamplingStrategyType.ALWAYS },
@@ -49,7 +56,7 @@ export const mastra = new Mastra({
         ],
       },
     },
-  },
+  }),
   server: {
     port: parseInt(process.env.PORT || '4111'),
     // experimental_auth: new MastraJwtAuth({

@@ -15,9 +15,10 @@ export const evaluateResultTool = createTool({
       .describe('評価する検索結果'),
     existingUrls: z.array(z.string()).describe('既に処理されたURL').optional(),
   }),
-  execute: async ({ context, mastra }) => {
+  execute: async (inputData, context) => {
     try {
-      const { query, result, existingUrls = [] } = context;
+      const { query, result, existingUrls = [] } = inputData;
+      const { mastra } = context;
 
       // Check if URL already exists (only if existingUrls was provided)
       if (existingUrls && existingUrls.includes(result.url)) {

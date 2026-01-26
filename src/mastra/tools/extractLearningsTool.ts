@@ -14,12 +14,12 @@ export const extractLearningsTool = createTool({
       })
       .describe('The search result to process'),
   }),
-  execute: async ({ context, mastra }) => {
-    const logger = mastra?.getLogger();
+  execute: async (inputData, context) => {
+    const logger = context.mastra?.getLogger();
     try {
-      const { query, result } = context;
+      const { query, result } = inputData;
 
-      const learningExtractionAgent = mastra!.getAgent('learningExtractionAgent');
+      const learningExtractionAgent = context.mastra!.getAgent('learningExtractionAgent');
 
       const response = await learningExtractionAgent.generate(
         [
